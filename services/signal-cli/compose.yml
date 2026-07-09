@@ -1,0 +1,30 @@
+# Signal Messenger REST API (wrapper around signal-cli)
+# Upstream: https://github.com/bbernhard/signal-cli-rest-api
+#
+# Usage:
+#   cp .env.example .env
+#   docker compose up -d
+#   docker compose logs -f
+
+services:
+  signal-cli-rest-api:
+    image: bbernhard/signal-cli-rest-api:${SIGNAL_IMAGE_TAG:-latest}
+    container_name: signal-cli-rest-api
+    restart: unless-stopped
+    ports:
+      - "${SIGNAL_HOST_PORT:-8080}:8080"
+    environment:
+      # Modes: normal | native | json-rpc
+      # native is faster; normal is more compatible. See service README.
+      - MODE=${SIGNAL_MODE:-native}
+      # Optional: auto-receive on a cron schedule (uncomment / set in .env if needed)
+      # - AUTO_RECEIVE_SCHEDULE=${SIGNAL_AUTO_RECEIVE_SCHEDULE:-}
+    volumes:
+      # Account keys & config — keep this directory private and backed up
+      - ./data:/home/.local/share/signal-cli
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/v1/about"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s

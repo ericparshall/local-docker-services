@@ -1,0 +1,25 @@
+# Environment files with secrets
+.env
+**/.env
+!.env.example
+!**/.env.example
+
+# Service data / state (never commit)
+**/data/
+**/signal-cli-config/
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs
+*.log
+logs/
