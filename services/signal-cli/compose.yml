@@ -1,5 +1,6 @@
 # Signal Messenger REST API (wrapper around signal-cli)
 # Upstream: https://github.com/bbernhard/signal-cli-rest-api
+# Host port: 18701 (see ../../PORTS.md)
 #
 # Usage:
 #   cp .env.example .env
@@ -13,7 +14,8 @@ services:
     # always: come back after Docker/daemon/machine restart (even if last stopped manually)
     restart: always
     ports:
-      - "${SIGNAL_HOST_PORT:-8080}:8080"
+      # Static host port (not 8080) — see ../../PORTS.md
+      - "${SIGNAL_HOST_PORT:-18701}:8080"
     environment:
       # Modes: normal | native | json-rpc
       # native is faster; normal is more compatible. See service README.
