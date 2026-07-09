@@ -20,6 +20,6 @@ Desktop.ini
 *.swp
 *~
 
-# Logs
+# Logs (ensure-all-up writes here)
 *.log
 logs/

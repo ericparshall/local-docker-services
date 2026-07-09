@@ -10,7 +10,8 @@ services:
   signal-cli-rest-api:
     image: bbernhard/signal-cli-rest-api:${SIGNAL_IMAGE_TAG:-latest}
     container_name: signal-cli-rest-api
-    restart: unless-stopped
+    # always: come back after Docker/daemon/machine restart (even if last stopped manually)
+    restart: always
     ports:
       - "${SIGNAL_HOST_PORT:-8080}:8080"
     environment:
@@ -23,7 +24,7 @@ services:
       # Account keys & config — keep this directory private and backed up
       - ./data:/home/.local/share/signal-cli
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/v1/about"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/v1/about"]
       interval: 30s
       timeout: 5s
       retries: 5
