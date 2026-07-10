@@ -7,7 +7,7 @@ Container-internal ports may still be the image default; only the **left** side 
 
 | Service | Host port(s) | Container | Protocol | Notes |
 |---------|--------------|-----------|----------|--------|
-| **signal-cli** | **18701** | 8080 | HTTP | REST API (`bbernhard/signal-cli-rest-api`) → `http://127.0.0.1:18701` |
+| **signal-cli** | **18701** | 8080 | HTTP | Native `signal-cli daemon --http` (JSON-RPC + SSE) → `http://127.0.0.1:18701` — Hermes: `GET /api/v1/check` |
 
 ## Allocation rules
 
@@ -21,7 +21,7 @@ Container-internal ports may still be the image default; only the **left** side 
 | Range | Use |
 |-------|-----|
 | `18700` | Reserved (project sentinel / future gateway) |
-| `18701` | signal-cli REST API |
+| `18701` | signal-cli native HTTP daemon |
 | `18702–18799` | Available for next services |
 
 ## Quick check

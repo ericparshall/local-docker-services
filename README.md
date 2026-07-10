@@ -28,7 +28,7 @@ Host ports live in **`18700–18799`** so they never collide with common default
 
 | Service | Host port | URL |
 |---------|-----------|-----|
-| signal-cli | **18701** | `http://127.0.0.1:18701` |
+| signal-cli (native HTTP daemon) | **18701** | `http://127.0.0.1:18701` |
 
 ## Layout
 
@@ -41,7 +41,7 @@ local-docker-services/
 │   ├── ensure-all-up.ps1      # bring every stack up (waits for Docker)
 │   └── install-autostart.ps1  # install Windows logon Scheduled Task
 └── services/
-    └── signal-cli/            # Signal REST API → host :18701
+    └── signal-cli/            # signal-cli daemon --http → host :18701
         ├── compose.yml
         ├── .env.example
         └── README.md
@@ -73,7 +73,6 @@ Log: `logs/ensure-all-up.log` (gitignored).
 4. Put durable state under a local `data/` folder (already gitignored)
 5. New services are picked up automatically by `ensure-all-up.ps1`
 
-
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose v2)
@@ -84,3 +83,4 @@ Log: `logs/ensure-all-up.log` (gitignored).
 - **Secrets**: never commit `.env` files or account data under `data/`
 - **Ports**: static map in [PORTS.md](./PORTS.md) — never bind common defaults on the host
 - **Restart**: use `restart: always` so stacks return after reboot / Docker restart
+- **signal-cli**: Hermes needs the **native** HTTP daemon (`/api/v1/*`), not `signal-cli-rest-api` (`/v1/*`)

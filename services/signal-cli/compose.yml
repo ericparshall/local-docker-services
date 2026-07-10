@@ -1,33 +1,48 @@
-# Signal Messenger REST API (wrapper around signal-cli)
-# Upstream: https://github.com/bbernhard/signal-cli-rest-api
+# Native signal-cli HTTP daemon (JSON-RPC + SSE) for Hermes Agent
+# Upstream: https://github.com/AsamK/signal-cli
+# Package image: https://packaging.gitlab.io/signal-cli/installation/docker/
 # Host port: 18701 (see ../../PORTS.md)
+#
+# Hermes requires the *native* signal-cli HTTP API:
+#   GET  /api/v1/check
+#   GET  /api/v1/events?account=...
+#   POST /api/v1/rpc
+# The old bbernhard/signal-cli-rest-api wrapper (/v1/*) is NOT compatible.
 #
 # Usage:
 #   cp .env.example .env
 #   docker compose up -d
 #   docker compose logs -f
+#   # first time: link a device (see README.md)
+#   docker compose down
 
 services:
-  signal-cli-rest-api:
-    image: bbernhard/signal-cli-rest-api:${SIGNAL_IMAGE_TAG:-latest}
-    container_name: signal-cli-rest-api
-    # always: come back after Docker/daemon/machine restart (even if last stopped manually)
+  signal-cli:
+    image: registry.gitlab.com/packaging/signal-cli/signal-cli-${SIGNAL_VARIANT:-jre}:${SIGNAL_IMAGE_TAG:-latest}
+    container_name: signal-cli
+    # always: come back after Docker/daemon/machine restart
     restart: always
+    # Multi-account HTTP JSON-RPC + SSE (Hermes adapter protocol)
+    # Bind 0.0.0.0 inside the container; host binding is localhost-ish via published port.
+    command:
+      - daemon
+      - --http
+      - 0.0.0.0:8080
+      - --no-receive-stdout
     ports:
       # Static host port (not 8080) — see ../../PORTS.md
       - "${SIGNAL_HOST_PORT:-18701}:8080"
-    environment:
-      # Modes: normal | native | json-rpc
-      # native is faster; normal is more compatible. See service README.
-      - MODE=${SIGNAL_MODE:-native}
-      # Optional: auto-receive on a cron schedule (uncomment / set in .env if needed)
-      # - AUTO_RECEIVE_SCHEDULE=${SIGNAL_AUTO_RECEIVE_SCHEDULE:-}
     volumes:
-      # Account keys & config — keep this directory private and backed up
-      - ./data:/home/.local/share/signal-cli
+      # Account keys & config — keep private and backed up
+      # Packaging image uses /var/lib/signal-cli (HOME for user signal-cli)
+      - ./data:/var/lib/signal-cli
+    tmpfs:
+      # Required by packaging image docs (native/JRE needs exec tmp)
+      - /tmp:exec
+    # Image has no curl/wget; port-open check is enough for restart policy
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/v1/about"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 40s
+      start_period: 25s
